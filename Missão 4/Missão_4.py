@@ -64,5 +64,5 @@ while True:                              # Laço infinito continuará capturando
                                              # "Contador de dedos".
     cv2.waitKey(1)                           # Aguarda por 1 milissegundo antes de processar o próximo frame.
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):      # Pressionada a tecla "q" saio do loop, consequentemente fecho o "programa"
+    if cv2.waitKey(1) & 0xFF == ord('q'):      # Pressionada a tecla "q" sai do loop, consequentemente fecho o "programa"
         break
