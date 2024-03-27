@@ -1,6 +1,9 @@
 #Importei as bibliotecas
 import cv2
 import mediapipe as mp
+from cvzone.FaceDetectionModule import FaceDetector # Peguei apenas o FaceDetector da cvzone
+
+detector = FaceDetector(minDetectionCon=0.5) # Criei a variável detector - com um limite de confiança para detectar a face
 
 # Variáveis de configurações
 video = cv2.VideoCapture(0)              # Cria um objeto de captura de vídeo que representa a câmera do computador. 
@@ -11,19 +14,29 @@ mpDwaw = mp.solutions.drawing_utils      # mpDraw é um módulo de utilitários 
 while True:                              # Laço infinito continuará capturando e processando frames da câmera.
 
     check, imagem = video.read()         # Lê um frame da câmera e armazena na variável imagem. 
+    imagem,cord_face = detector.findFaces(imagem,draw=False) # Essa função vai encontra a face dentro da imagem
     imgRGB = cv2.cvtColor(imagem, cv2.COLOR_BGR2RGB)  # Converte o frame de BGR (o padrão do OpenCV) para RGB.
     processado = pata.process(imgRGB)    # Processa o frame utilizando o modelo de detecção de mãos da MediaPipe.
     Pontos_palmo = processado.multi_hand_landmarks    # Extrai os pontos de referência das mãos detectadas no frame processado.
     altura, largura, _ = imagem.shape    # Obtêm as dimensões da imagem (altura e largura).
     pontos = []                          # Inicializa uma lista para armazenar os pontos de referência das mãos.
 
+    if cord_face:                       # Esta condicional é verdadeira apenas se cord_face não estiver vazia.
+        for bbox in cord_face:          # Percorrer as cordenadas da face e extraindo os Bounding boxes.
+            cord_xx ,cord_yy, larguraa, alturaa = bbox['bbox'] # Buscando as coordenadas no dicionário retornado da 
+                                                               #função   findFaces.
+            recorte = imagem[cord_yy : cord_yy + alturaa, cord_xx : cord_xx + larguraa] # Extrair o recorte de onde está a face.
+            recorte_borrado = cv2.blur(recorte,(30,30))                       # Borramos o recorte com a função blur e
+                                                                              # definimos a matriz de vizinho.
+            imagem[cord_yy : cord_yy + alturaa, cord_xx : cord_xx + larguraa] = recorte_borrado
+
     if Pontos_palmo:                     # Esta condicional é verdadeira apenas se Pontos_palmo não estiver vazia.
 
         for marcas in Pontos_palmo:      # loop percorre a variável Pontos_palmo e retornar as coordenadas para cada ponto.
 
-            mpDwaw.draw_landmarks(imagem, marcas, palmo.HAND_CONNECTIONS)# Desenha os pontos de referência e as conexões da mão.
+           mpDwaw.draw_landmarks(imagem, marcas, palmo.HAND_CONNECTIONS)# Desenha os pontos de referência e as conexões da mão.
 
-            for enumeracao, cord in enumerate(marcas.landmark):  # loop itera sobre cada ponto de referência (marcador) da mão.
+           for enumeracao, cord in enumerate(marcas.landmark):  # loop itera sobre cada ponto de referência (marcador) da mão.
 
                 cordenada_x, cordenada_y = int(cord.x*largura), int(cord.y*altura)  # Converte as coordenadas normalizadas  
                                                                                     # dos  pontos de referência em coordenadas de pixels.
